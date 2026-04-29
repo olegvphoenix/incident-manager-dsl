@@ -1,0 +1,45 @@
+{
+  "dslVersion": "1.0",
+  "metadata": {
+    "name": "[A4] Библиотечный 'Связь со старшим' — версия 1",
+    "description": "Версия 1: только 3 канала связи. Эта версия может быть зафиксирована в старых родителях через CallScenario.version=1.",
+    "scenarioGuid": "00000000-0000-0001-0000-000000000020",
+    "version": 1,
+    "kind": "library",
+    "purpose": "architecture-demo"
+  },
+  "initialStepId": "method",
+  "steps": [
+    {
+      "id": "method",
+      "type": "RadioButton",
+      "view": {
+        "label": "Способ связи со старшим смены",
+        "options": [
+          { "id": "phone",     "label": "Телефон" },
+          { "id": "in_person", "label": "Лично"   },
+          { "id": "no_reply",  "label": "Не отвечает" }
+        ],
+        "required": true
+      },
+      "transitions": { "default": { "goto": "decision" } }
+    },
+    {
+      "id": "decision",
+      "type": "Comment",
+      "view": {
+        "label": "Указания старшего",
+        "required": true,
+        "minLength": 10
+      },
+      "transitions": { "default": { "goto": "ack" } }
+    },
+    {
+      "id": "ack",
+      "type": "Button",
+      "view": { "label": "Связь зафиксирована" },
+      "editable": false,
+      "transitions": { "default": { "actions": [ { "type": "finish" } ] } }
+    }
+  ]
+}

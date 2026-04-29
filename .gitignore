@@ -1,0 +1,27 @@
+# Node / Vite (runner-web)
+**/node_modules/
+**/dist/
+**/.vite/
+**/*.local
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Build artifacts and smoke-test outputs
+runner-web/dist-tools/
+runner-web/tsconfig.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*.local

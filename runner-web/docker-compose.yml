@@ -1,0 +1,10 @@
+name: incident-runner
+
+services:
+  web:
+    build: .
+    image: incident-runner:latest
+    container_name: incident-runner
+    restart: unless-stopped
+    ports:
+      - "8080:80"

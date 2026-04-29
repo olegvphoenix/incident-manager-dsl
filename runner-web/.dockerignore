@@ -1,0 +1,13 @@
+node_modules
+.vite
+*.local
+.DS_Store
+src
+public
+tools
+tsconfig*.json
+vite.config.ts
+package-lock.json
+package.json
+README.md
+.gitignore

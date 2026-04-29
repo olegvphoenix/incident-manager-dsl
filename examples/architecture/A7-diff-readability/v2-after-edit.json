@@ -1,0 +1,100 @@
+{
+  "dslVersion": "1.0",
+  "metadata": {
+    "scenarioGuid": "0912116e-7370-77df-8bff-b00255d753f1",
+    "version": 2,
+    "name": "[A7] Сценарий 'Контроль доступа' — версия 2",
+    "purpose": "architecture-demo",
+    "demonstrates": "Версия 2 после правки от продакта: 'добавь опцию временного пропуска и эскалируй отказы службе безопасности'. Diff с v1-original.json — это весь объём правки.",
+    "changesSinceV1": [
+      "Добавлена опция 'temporary' в decision",
+      "В ветку 'deny' добавлен escalate-action на security_chief"
+    ]
+  },
+  "initialStepId": "decision",
+  "steps": [
+    {
+      "id": "decision",
+      "type": "RadioButton",
+      "view": {
+        "label": "Решение по запросу доступа",
+        "options": [
+          {
+            "id": "grant",
+            "label": "Разрешить"
+          },
+          {
+            "id": "deny",
+            "label": "Отказать"
+          },
+          {
+            "id": "verify",
+            "label": "Запросить верификацию"
+          },
+          {
+            "id": "temporary",
+            "label": "Временный пропуск"
+          }
+        ],
+        "required": true
+      },
+      "transitions": {
+        "rules": [
+          {
+            "when": {
+              "==": [
+                {
+                  "var": "state.decision.value"
+                },
+                "deny"
+              ]
+            },
+            "goto": "reason"
+          }
+        ],
+        "default": {
+          "goto": "btn_close"
+        }
+      }
+    },
+    {
+      "id": "reason",
+      "type": "Comment",
+      "view": {
+        "label": "Причина отказа",
+        "required": true,
+        "minLength": 10
+      },
+      "transitions": {
+        "default": {
+          "goto": "btn_close",
+          "actions": [
+            {
+              "type": "escalate",
+              "args": {
+                "to": "security_chief"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "btn_close",
+      "type": "Button",
+      "view": {
+        "label": "Закрыть"
+      },
+      "editable": false,
+      "transitions": {
+        "default": {
+          "actions": [
+            {
+              "type": "finish"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "dslVersion": "1.0",
+  "locale": "ru",
+  "metadata": {
+    "name": "[Библиотека] Связь со старшим смены",
+    "description": "Переиспользуемый под-сценарий: оператор связывается со старшим смены, фиксирует факт связи и краткое решение. Используется в сложных инцидентах, где требуется санкция руководителя смены.",
+    "scenarioGuid": "00000000-0000-0001-0000-000000000001",
+    "version": 1,
+    "kind": "library",
+    "demonstrates": ["короткий sub-scenario с эскалацией и фиксацией решения"],
+    "complexity": "basic",
+    "tags": ["library", "supervisor", "escalation"]
+  },
+
+  "initialStepId": "contact_method",
+
+  "steps": [
+    {
+      "id": "contact_method",
+      "type": "RadioButton",
+      "title": "Способ связи",
+      "view": {
+        "label": "Как удалось связаться со старшим смены?",
+        "options": [
+          { "id": "phone",    "label": "Телефон / рация" },
+          { "id": "in_person","label": "Лично (пришёл в зал управления)" },
+          { "id": "messenger","label": "Корпоративный мессенджер" },
+          { "id": "no_reply", "label": "Не отвечает — нужна эскалация выше" }
+        ],
+        "required": true
+      },
+      "transitions": {
+        "rules": [
+          {
+            "when": { "==": [ {"var": "state.contact_method.value"}, "no_reply" ] },
+            "goto": "no_reply_action",
+            "actions": [
+              { "type": "escalate", "args": { "to": "duty-manager", "reason": "Старший смены недоступен" } }
+            ]
+          }
+        ],
+        "default": { "goto": "supervisor_decision" }
+      }
+    },
+
+    {
+      "id": "supervisor_decision",
+      "type": "Comment",
+      "title": "Решение старшего",
+      "view": {
+        "label": "Кратко зафиксируйте решение / указания старшего смены",
+        "placeholder": "Например: разрешено закрыть как ложное; вызвана группа реагирования",
+        "required": true,
+        "minLength": 15,
+        "maxRows": 5
+      },
+      "transitions": {
+        "default": { "goto": "btn_done" }
+      }
+    },
+
+    {
+      "id": "no_reply_action",
+      "type": "Comment",
+      "title": "Действия в отсутствие старшего",
+      "view": {
+        "label": "Что предпринято самостоятельно (с учётом эскалации выше)",
+        "required": true,
+        "minLength": 15
+      },
+      "transitions": {
+        "default": { "goto": "btn_done" }
+      }
+    },
+
+    {
+      "id": "btn_done",
+      "type": "Button",
+      "title": "Готово",
+      "view": { "label": "Связь зафиксирована", "emphasis": "primary" },
+      "editable": false,
+      "transitions": {
+        "default": {
+          "actions": [
+            { "type": "finish", "args": { "resolution": "supervisor_contacted" } }
+          ]
+        }
+      }
+    }
+  ]
+}

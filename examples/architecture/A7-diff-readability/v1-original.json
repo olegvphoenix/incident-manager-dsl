@@ -1,0 +1,84 @@
+{
+  "dslVersion": "1.0",
+  "metadata": {
+    "scenarioGuid": "76767a16-167d-7545-807b-a2dc8693d751",
+    "version": 1,
+    "name": "[A7] Сценарий 'Контроль доступа' — версия 1",
+    "purpose": "architecture-demo",
+    "demonstrates": "Сравните этот файл с v2-after-edit.json через git diff / IDE diff. Изменения должны быть локальны и читаемы — это и есть преимущество декларативного DSL над императивным кодом."
+  },
+  "initialStepId": "decision",
+  "steps": [
+    {
+      "id": "decision",
+      "type": "RadioButton",
+      "view": {
+        "label": "Решение по запросу доступа",
+        "options": [
+          {
+            "id": "grant",
+            "label": "Разрешить"
+          },
+          {
+            "id": "deny",
+            "label": "Отказать"
+          },
+          {
+            "id": "verify",
+            "label": "Запросить верификацию"
+          }
+        ],
+        "required": true
+      },
+      "transitions": {
+        "rules": [
+          {
+            "when": {
+              "==": [
+                {
+                  "var": "state.decision.value"
+                },
+                "deny"
+              ]
+            },
+            "goto": "reason"
+          }
+        ],
+        "default": {
+          "goto": "btn_close"
+        }
+      }
+    },
+    {
+      "id": "reason",
+      "type": "Comment",
+      "view": {
+        "label": "Причина отказа",
+        "required": true,
+        "minLength": 10
+      },
+      "transitions": {
+        "default": {
+          "goto": "btn_close"
+        }
+      }
+    },
+    {
+      "id": "btn_close",
+      "type": "Button",
+      "view": {
+        "label": "Закрыть"
+      },
+      "editable": false,
+      "transitions": {
+        "default": {
+          "actions": [
+            {
+              "type": "finish"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

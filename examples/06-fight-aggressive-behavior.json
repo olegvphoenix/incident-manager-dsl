@@ -1,0 +1,269 @@
+{
+  "dslVersion": "1.0",
+  "locale": "ru",
+  "metadata": {
+    "scenarioGuid": "dd01c3be-c9aa-7bbe-849b-9953751d5c24",
+    "version": 1,
+    "name": "Драка / агрессивное поведение",
+    "description": "Видеоаналитика обнаружила потасовку или агрессивное поведение. Оператор оценивает обстановку, при необходимости вызывает старшего смены (через библиотечный sub-scenario) и собирает доказательную базу.",
+    "demonstrates": [
+      "два разных CallScenario в одном сценарии",
+      "assign action на оператора-супервайзера",
+      "JSONLogic and/or"
+    ],
+    "complexity": "advanced",
+    "tags": [
+      "public-safety",
+      "fight",
+      "investigation",
+      "sub-scenario"
+    ]
+  },
+  "initialStepId": "severity",
+  "timers": {
+    "escalateAfterSec": 90,
+    "maxDurationSec": 1800
+  },
+  "concurrency": {
+    "stepLockable": true,
+    "allowMultitasking": false
+  },
+  "steps": [
+    {
+      "id": "severity",
+      "type": "RadioButton",
+      "title": "Шаг 1. Оценка тяжести",
+      "view": {
+        "label": "Что именно происходит на видео?",
+        "options": [
+          {
+            "id": "verbal_only",
+            "label": "Словесная перепалка, без физического контакта"
+          },
+          {
+            "id": "shoving",
+            "label": "Толчки, лёгкий физический контакт"
+          },
+          {
+            "id": "fight",
+            "label": "Драка с ударами"
+          },
+          {
+            "id": "weapon_visible",
+            "label": "Виден предмет, используемый как оружие"
+          },
+          {
+            "id": "ended",
+            "label": "Инцидент уже завершён, расходятся"
+          }
+        ],
+        "required": true
+      },
+      "transitions": {
+        "rules": [
+          {
+            "when": {
+              "==": [
+                {
+                  "var": "state.severity.value"
+                },
+                "weapon_visible"
+              ]
+            },
+            "goto": "call_supervisor",
+            "actions": [
+              {
+                "type": "callMacro",
+                "args": {
+                  "macroId": "MACRO_DISPATCH_GUARD_TEAM"
+                }
+              },
+              {
+                "type": "callMacro",
+                "args": {
+                  "macroId": "MACRO_CALL_POLICE"
+                }
+              },
+              {
+                "type": "assign",
+                "args": {
+                  "to": "shift-supervisor"
+                }
+              }
+            ]
+          },
+          {
+            "when": {
+              "or": [
+                {
+                  "==": [
+                    {
+                      "var": "state.severity.value"
+                    },
+                    "fight"
+                  ]
+                },
+                {
+                  "==": [
+                    {
+                      "var": "state.severity.value"
+                    },
+                    "shoving"
+                  ]
+                }
+              ]
+            },
+            "goto": "call_supervisor",
+            "actions": [
+              {
+                "type": "callMacro",
+                "args": {
+                  "macroId": "MACRO_DISPATCH_GUARD_TEAM"
+                }
+              }
+            ]
+          },
+          {
+            "when": {
+              "==": [
+                {
+                  "var": "state.severity.value"
+                },
+                "ended"
+              ]
+            },
+            "goto": "evidence"
+          }
+        ],
+        "default": {
+          "goto": "verbal_protocol"
+        }
+      }
+    },
+    {
+      "id": "verbal_protocol",
+      "type": "Comment",
+      "title": "Шаг 2. Протокол словесного конфликта",
+      "view": {
+        "label": "Опишите ситуацию (для словесного конфликта обычно не требуется выезд)",
+        "required": true,
+        "minLength": 20
+      },
+      "transitions": {
+        "default": {
+          "goto": "btn_close_minor"
+        }
+      }
+    },
+    {
+      "id": "call_supervisor",
+      "type": "CallScenario",
+      "title": "Шаг 2. Связь со старшим смены",
+      "view": {
+        "scenarioGuid": "00000000-0000-0001-0000-000000000001",
+        "version": 1
+      },
+      "transitions": {
+        "default": {
+          "goto": "evidence"
+        }
+      }
+    },
+    {
+      "id": "evidence",
+      "type": "CallScenario",
+      "title": "Шаг 3. Сбор доказательной базы",
+      "view": {
+        "scenarioGuid": "00000000-0000-0001-0000-000000000003",
+        "version": 1
+      },
+      "transitions": {
+        "default": {
+          "goto": "follow_up"
+        }
+      }
+    },
+    {
+      "id": "follow_up",
+      "type": "RadioButton",
+      "title": "Шаг 4. Последствия",
+      "view": {
+        "label": "Какие действия предприняты после прибытия охраны?",
+        "options": [
+          {
+            "id": "detained",
+            "label": "Участники задержаны охраной"
+          },
+          {
+            "id": "police_handle",
+            "label": "Передано полиции"
+          },
+          {
+            "id": "medical_help",
+            "label": "Вызвана скорая помощь"
+          },
+          {
+            "id": "dispersed",
+            "label": "Разогнаны, ушли мирно"
+          }
+        ],
+        "required": true
+      },
+      "transitions": {
+        "default": {
+          "goto": "btn_close"
+        }
+      }
+    },
+    {
+      "id": "btn_close",
+      "type": "Button",
+      "title": "Завершение",
+      "view": {
+        "label": "Закрыть инцидент с отчётом",
+        "emphasis": "destructive"
+      },
+      "editable": false,
+      "transitions": {
+        "default": {
+          "actions": [
+            {
+              "type": "generateReport",
+              "args": {
+                "templateId": "violence_incident_report"
+              }
+            },
+            {
+              "type": "finish",
+              "args": {
+                "resolution": "processed"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "btn_close_minor",
+      "type": "Button",
+      "title": "Завершение",
+      "view": {
+        "label": "Закрыть как лёгкий инцидент",
+        "emphasis": "secondary"
+      },
+      "editable": false,
+      "transitions": {
+        "default": {
+          "actions": [
+            {
+              "type": "finish",
+              "args": {
+                "resolution": "processed_minor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
