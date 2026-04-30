@@ -5,17 +5,15 @@
     "scenarioGuid": "7550062e-7865-7bad-857b-871d1b31f7c1",
     "version": 1,
     "name": "Авария оборудования: камера офлайн",
-    "description": "Камера видеонаблюдения перестала отвечать. Оператор быстро определяет причину; если своими силами не решается — переиспользуется библиотечный сценарий 'Запрос в техподдержку'.",
+    "description": "Камера видеонаблюдения перестала отвечать. Оператор быстро определяет причину; если своими силами не решается — оформляется заявка в техподдержку.",
     "demonstrates": [
-      "CallScenario (вложенный сценарий 'Запрос в техподдержку')",
-      "вход и выход из sub-scenario",
-      "ссылка по scenarioGuid + version"
+      "Условные переходы (RadioButton + JSONLogic)",
+      "Действия на переходах (callMacro, generateReport, finish)"
     ],
     "complexity": "intermediate",
     "tags": [
       "infrastructure",
-      "camera-offline",
-      "sub-scenario"
+      "camera-offline"
     ]
   },
   "initialStepId": "diagnostic",
@@ -118,17 +116,50 @@
           }
         ],
         "default": {
-          "goto": "tech_support"
+          "goto": "tech_support_details"
         }
       }
     },
     {
-      "id": "tech_support",
-      "type": "CallScenario",
-      "title": "Шаг 3. Запрос в техподдержку",
+      "id": "tech_support_details",
+      "type": "Comment",
+      "title": "Шаг 3. Заявка в техподдержку",
       "view": {
-        "scenarioGuid": "00000000-0000-0001-0000-000000000002",
-        "version": 1
+        "label": "Опишите проблему для инженера техподдержки (что произошло, что попробовали, текущее состояние)",
+        "placeholder": "Например: после перезапуска камера всё ещё не отвечает, на коммутаторе порт UP, питание есть.",
+        "required": true,
+        "minLength": 30,
+        "maxLength": 2000,
+        "minRows": 4,
+        "maxRows": 12
+      },
+      "transitions": {
+        "default": {
+          "goto": "tech_support_priority"
+        }
+      }
+    },
+    {
+      "id": "tech_support_priority",
+      "type": "RadioButton",
+      "title": "Шаг 4. Приоритет заявки",
+      "view": {
+        "label": "Какой приоритет назначить заявке?",
+        "options": [
+          {
+            "id": "low",
+            "label": "Низкий — камера некритична"
+          },
+          {
+            "id": "normal",
+            "label": "Обычный — рабочее время"
+          },
+          {
+            "id": "high",
+            "label": "Высокий — критическая зона"
+          }
+        ],
+        "required": true
       },
       "transitions": {
         "default": {

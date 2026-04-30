@@ -1,4 +1,5 @@
 import { KEY_FACTS, PRINCIPLES } from "../home/facts";
+import { openInConfigurator } from "../scenarios/openInConfigurator";
 
 interface Props {
   onGo: (target: "schema" | "runner" | "docs", deepLink?: string) => void;
@@ -24,13 +25,24 @@ export function HomeView({ onGo }: Props) {
           accent="schema"
           title="Схема"
           tagline="Целостная модель"
-          body="Mermaid-диаграмма всех 8 типов шагов, 5 actions, переходов и runtime-структур. Каждый узел — с описанием полей из JSON Schema, примером и легаси-маппингом."
+          body="Mermaid-диаграмма всех 7 типов шагов, 5 actions, переходов и runtime-структур. Каждый узел — с описанием полей из JSON Schema, примером и легаси-маппингом."
           cta="Открыть обзор"
           onClick={() => onGo("schema")}
           secondary={[
             { label: "RadioButton", onClick: () => onGo("schema", "step:RadioButton") },
             { label: "scenarioResult", onClick: () => onGo("schema", "result") },
             { label: "JSONLogic", onClick: () => onGo("schema", "transitions:jsonlogic") },
+          ]}
+        />
+        <DoorCard
+          accent="configurator"
+          title="Конфигуратор"
+          tagline="Создать или отредактировать сценарий"
+          body="Web-редактор сценариев с двумя представлениями: таблица (основная) для больших сценариев и flow-диаграмма (карта переходов) — вспомогательная. Drag-палитра, JSONLogic-builder, диагностика, live-preview."
+          cta="Открыть конфигуратор"
+          onClick={() => openInConfigurator()}
+          secondary={[
+            { label: "Создать пустой сценарий", onClick: () => openInConfigurator() },
           ]}
         />
         <DoorCard
@@ -112,7 +124,7 @@ export function HomeView({ onGo }: Props) {
 }
 
 interface DoorProps {
-  accent: "schema" | "runner" | "docs";
+  accent: "schema" | "runner" | "docs" | "configurator";
   title: string;
   tagline: string;
   body: string;

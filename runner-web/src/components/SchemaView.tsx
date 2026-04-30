@@ -320,10 +320,6 @@ function ValidationMatrix({ node }: { node: SchemaNode }) {
   if (node.id === "transitions" || node.id === "transitions:rule") {
     rows.push({ what: "JSONLogic — whitelist операторов", where: "Сервер (см. spec §7) — на этапе сохранения" });
   }
-  if (node.id.startsWith("step:CallScenario")) {
-    rows.push({ what: "Существование вызываемого scenarioGuid+version", where: "Сервер при создании Incident'а (inline-resolve)" });
-    rows.push({ what: "Отсутствие циклов в графе вызовов", where: "Сервер при сохранении и при создании Incident'а" });
-  }
   if (node.id === "metadata") {
     rows.push({ what: "scenarioGuid — UUID, не меняется в течение жизни", where: "JSON Schema формат + сервер на UPDATE" });
     rows.push({ what: "version — целое >= 1, монотонно растёт", where: "Сервер при публикации новой версии" });

@@ -19,8 +19,7 @@ export type StepType =
   | "Select"
   | "Comment"
   | "Image"
-  | "Datetime"
-  | "CallScenario";
+  | "Datetime";
 
 // JSONLogic — произвольный JSON, валидируется отдельным whitelist'ом
 // при сохранении сценария на сервере. В runner'е просто eval'им.
@@ -122,11 +121,6 @@ export interface DatetimeStep extends StepBase {
   };
 }
 
-export interface CallScenarioStep extends StepBase {
-  type: "CallScenario";
-  view: { scenarioGuid: string; version: number; stepIdPrefix?: string };
-}
-
 export type Step =
   | ButtonStep
   | RadioButtonStep
@@ -134,8 +128,7 @@ export type Step =
   | SelectStep
   | CommentStep
   | ImageStep
-  | DatetimeStep
-  | CallScenarioStep;
+  | DatetimeStep;
 
 // Identity-блок сценария. scenarioGuid + version + name обязательны
 // (см. dsl-v1-schema.json /metadata/required); прочие поля свободные.

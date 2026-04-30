@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { ScenarioEntry } from "../scenarios";
 import { buildTree, type Category } from "../scenarios/classify";
+import { openInConfigurator } from "../scenarios/openInConfigurator";
 
 interface Props {
   scenarios: ScenarioEntry[];
@@ -16,7 +17,6 @@ const DEFAULT_OPEN: Record<Category, boolean> = {
   showcase: true,
   user: true,
   production: true,
-  library: false,
   architecture: false,
   antipattern: false,
 };
@@ -139,17 +139,35 @@ function ItemRow({
 }) {
   const name = entry.scenario.metadata?.name ?? entry.id;
   const fileName = entry.id.split("/").pop() ?? entry.id;
+  // Кнопка-карандаш справа открывает конфигуратор и грузит туда сценарий
+  // через localStorage-handoff. Span-обёртка нужна, чтобы вложенная button
+  // не приводила к invalid HTML (кнопка в кнопке).
   return (
-    <button
-      className={`tree__item depth-${depth} ${active ? "tree__item--active" : ""} ${running ? "tree__item--running" : ""} ${!entry.isRunnable ? "tree__item--blocked" : ""}`}
-      onClick={() => onSelect(entry)}
-      title={entry.reasonNotRunnable ?? entry.id}
+    <span
+      className={`tree__item-wrap depth-${depth} ${active ? "tree__item-wrap--active" : ""}`}
     >
-      <span className="tree__item-icon">
-        {running ? "▶" : entry.isRunnable ? "·" : "⊘"}
-      </span>
-      <span className="tree__item-name">{name}</span>
-      <span className="tree__item-file">{fileName}</span>
-    </button>
+      <button
+        className={`tree__item depth-${depth} ${active ? "tree__item--active" : ""} ${running ? "tree__item--running" : ""} ${!entry.isRunnable ? "tree__item--blocked" : ""}`}
+        onClick={() => onSelect(entry)}
+        title={entry.reasonNotRunnable ?? entry.id}
+      >
+        <span className="tree__item-icon">
+          {running ? "▶" : entry.isRunnable ? "·" : "⊘"}
+        </span>
+        <span className="tree__item-name">{name}</span>
+        <span className="tree__item-file">{fileName}</span>
+      </button>
+      <button
+        className="tree__item-edit"
+        onClick={(e) => {
+          e.stopPropagation();
+          openInConfigurator({ scenario: entry.scenario, baseName: fileName });
+        }}
+        title="Редактировать в конфигураторе"
+        aria-label="Редактировать"
+      >
+        ✎
+      </button>
+    </span>
   );
 }

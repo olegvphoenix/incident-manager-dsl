@@ -5,18 +5,17 @@
     "scenarioGuid": "dd01c3be-c9aa-7bbe-849b-9953751d5c24",
     "version": 1,
     "name": "Драка / агрессивное поведение",
-    "description": "Видеоаналитика обнаружила потасовку или агрессивное поведение. Оператор оценивает обстановку, при необходимости вызывает старшего смены (через библиотечный sub-scenario) и собирает доказательную базу.",
+    "description": "Видеоаналитика обнаружила потасовку или агрессивное поведение. Оператор оценивает обстановку, при необходимости назначает старшего смены и собирает доказательную базу.",
     "demonstrates": [
-      "два разных CallScenario в одном сценарии",
-      "assign action на оператора-супервайзера",
-      "JSONLogic and/or"
+      "Множественные правила (JSONLogic and/or)",
+      "Несколько действий на одном переходе (callMacro + assign)",
+      "Сбор доказательств: Image + Comment"
     ],
     "complexity": "advanced",
     "tags": [
       "public-safety",
       "fight",
-      "investigation",
-      "sub-scenario"
+      "investigation"
     ]
   },
   "initialStepId": "severity",
@@ -70,7 +69,7 @@
                 "weapon_visible"
               ]
             },
-            "goto": "call_supervisor",
+            "goto": "supervisor_briefing",
             "actions": [
               {
                 "type": "callMacro",
@@ -82,12 +81,6 @@
                 "type": "callMacro",
                 "args": {
                   "macroId": "MACRO_CALL_POLICE"
-                }
-              },
-              {
-                "type": "assign",
-                "args": {
-                  "to": "shift-supervisor"
                 }
               }
             ]
@@ -113,7 +106,7 @@
                 }
               ]
             },
-            "goto": "call_supervisor",
+            "goto": "supervisor_briefing",
             "actions": [
               {
                 "type": "callMacro",
@@ -132,7 +125,7 @@
                 "ended"
               ]
             },
-            "goto": "evidence"
+            "goto": "evidence_snapshot"
           }
         ],
         "default": {
@@ -156,26 +149,55 @@
       }
     },
     {
-      "id": "call_supervisor",
-      "type": "CallScenario",
-      "title": "Шаг 2. Связь со старшим смены",
+      "id": "supervisor_briefing",
+      "type": "Comment",
+      "title": "Шаг 2. Доклад старшему смены",
       "view": {
-        "scenarioGuid": "00000000-0000-0001-0000-000000000001",
-        "version": 1
+        "label": "Кратко доложите старшему смены: что происходит, кто из охраны направлен, нужна ли полиция.",
+        "placeholder": "Например: драка двух человек у входа, направил группу 2, полиция вызвана.",
+        "required": true,
+        "minLength": 20,
+        "minRows": 3
       },
       "transitions": {
         "default": {
-          "goto": "evidence"
+          "goto": "evidence_snapshot",
+          "actions": [
+            {
+              "type": "assign",
+              "args": {
+                "to": "shift-supervisor"
+              }
+            }
+          ]
         }
       }
     },
     {
-      "id": "evidence",
-      "type": "CallScenario",
-      "title": "Шаг 3. Сбор доказательной базы",
+      "id": "evidence_snapshot",
+      "type": "Image",
+      "title": "Шаг 3a. Снимок с камеры",
       "view": {
-        "scenarioGuid": "00000000-0000-0001-0000-000000000003",
-        "version": 1
+        "label": "Снимок ключевого момента происшествия (с камеры)",
+        "source": "camera",
+        "allowMultiple": true,
+        "required": true
+      },
+      "transitions": {
+        "default": {
+          "goto": "evidence_notes"
+        }
+      }
+    },
+    {
+      "id": "evidence_notes",
+      "type": "Comment",
+      "title": "Шаг 3b. Описание для протокола",
+      "view": {
+        "label": "Опишите участников, их действия, время и место происшествия (для протокола).",
+        "required": true,
+        "minLength": 50,
+        "minRows": 4
       },
       "transitions": {
         "default": {

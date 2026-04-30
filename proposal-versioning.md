@@ -26,17 +26,9 @@
    чтобы старые инциденты не «ломались» при правке сценария.
 3. Завести материализованное представление `scenarios_latest` для тех мест,
    где UI показывает «текущую версию».
-4. **Реализовать inline-резолв `CallScenario`-шагов** при создании Incident'а
-   — сервис разворачивает design-time ссылки на дочерние сценарии в плоский
-   граф шагов, складывает в `incidents.scenario`. Runner про вложенность не
-   знает (см. `dsl-v1-draft.md` §6.8 и принцип П9).
-5. **Добавить валидацию циклов** `CallScenario`-зависимостей при сохранении
-   сценария (DFS-обход, 422 при обнаружении). См. решение Р5 в
-   `dsl-v1-draft.md` §13.1.
 
 Это **5 SQL-инструкций** в новой миграции `005_add_scenarios_versioning.sql`,
-**одно поле** в OpenAPI, **минимальные** правки в репозитории. Плюс новый
-сервисный модуль `scenarioresolver` (~150 строк Go без тестов). Бизнес-логика
+**одно поле** в OpenAPI, **минимальные** правки в репозитории. Бизнес-логика
 не меняется. Текущие инциденты остаются работоспособными после миграции.
 
 ---
@@ -476,130 +468,36 @@ GetVersion(ctx, scenarioGUID, version int) (Scenario, error)
 Archive(ctx, scenarioGUID) error
 ```
 
-### 6.2. Sub-scenario resolver (новый модуль)
+### 6.2. Service
 
-Новый сервисный пакет, например `internal/im/service/scenarioresolver`. Его
-обязанности:
-
-- **Inline-резолв `CallScenario`-шагов** при создании Incident'а. Принимает
-  `script` родительского сценария, рекурсивно подгружает дочерние через
-  репозиторий, заменяет `CallScenario`-шаги на плоские шаги дочерних с
-  префиксацией id.
-- **Валидация циклов** при сохранении сценария. DFS-обход графа ссылок
-  `CallScenario`. При обнаружении цикла — ошибка, обработчик возвращает
-  422 Unprocessable Entity.
-
-Примерный API:
-
-```go
-package scenarioresolver
-
-type Resolver struct {
-    scenarios ScenarioRepository
-}
-
-// Inline разворачивает все CallScenario-шаги в плоский набор шагов.
-// Используется при создании Incident'а.
-//
-// `script` — содержимое родительского scenarios.script (jsonb).
-// Возвращает плоский script для записи в incidents.scenario.
-func (r *Resolver) Inline(ctx context.Context, script json.RawMessage) (json.RawMessage, error)
-
-// ValidateNoCycles проверяет, что сценарий не образует цикл по ссылкам
-// CallScenario. Используется при сохранении сценария.
-func (r *Resolver) ValidateNoCycles(ctx context.Context, script json.RawMessage) error
-```
-
-**Алгоритм `Inline` (в общих чертах):**
-
-1. Разобрать `script` в структуру `Script` (типы шагов уже описаны в DSL).
-2. Найти все шаги с `type: "CallScenario"`.
-3. Для каждого:
-   - подгрузить `scenarios WHERE guid=view.scenarioGuid AND version=view.version`;
-   - **рекурсивно** вызвать `Inline` на дочернем `script` (на случай вложенности
-     дочерних в дочернем);
-   - префикс = `view.stepIdPrefix` или `step.id` (по умолчанию);
-   - переименовать все step.id → `prefix__originalId`;
-   - в `transitions.rules[].when` обновить все `var: state.X.value` → `var:
-     state.prefix__X.value`;
-   - заменить `CallScenario`-шаг на набор префиксированных шагов;
-   - сшить точки входа/выхода (см. `dsl-v1-draft.md` §6.8 «Что делает сервер»).
-4. Сериализовать обратно в JSON.
-
-**Алгоритм `ValidateNoCycles`:**
-
-```go
-func (r *Resolver) ValidateNoCycles(ctx context.Context, script json.RawMessage) error {
-    visited := map[uuid.UUID]bool{}
-    var visit func(s json.RawMessage, stack []uuid.UUID) error
-    visit = func(s json.RawMessage, stack []uuid.UUID) error {
-        callRefs := extractCallScenarioRefs(s)
-        for _, ref := range callRefs {
-            if slices.Contains(stack, ref.GUID) {
-                return ErrCycleDetected{Path: stack}
-            }
-            if visited[ref.GUID] { continue }
-            visited[ref.GUID] = true
-            child, err := r.scenarios.GetVersion(ctx, ref.GUID, ref.Version)
-            if err != nil { return err }
-            if err := visit(child.Script, append(stack, ref.GUID)); err != nil {
-                return err
-            }
-        }
-        return nil
-    }
-    return visit(script, nil)
-}
-```
-
-**Тесты:**
-- positive: 2 уровня вложенности (родитель → ребёнок → внук) — резолвится
-  в плоский script;
-- positive: один и тот же дочерний 2 раза в одном родителе с разными
-  step.id — оба inline'ятся с разными префиксами;
-- negative: A → B → A — ловится `ValidateNoCycles` с понятным path.
-
-### 6.3. Service
-
-При создании инцидента — теперь с резолвом:
+При создании инцидента — берём свежайшую версию родительского сценария и
+снапшотим её в инцидент:
 
 ```go
 func (s *IncidentService) CreateFromRule(ctx, rule IncidentRule, source SourceEvent) (Incident, error) {
-    // 1. Берём СВЕЖАЙШУЮ версию родительского сценария
     scenario, err := s.scenarios.GetLatest(ctx, rule.ScenarioGUID)
     if err != nil { return Incident{}, err }
 
-    // 2. NEW: разворачиваем CallScenario-шаги в плоский граф
-    flatScript, err := s.resolver.Inline(ctx, scenario.Script)
-    if err != nil { return Incident{}, err }
-
-    // 3. Создаём инцидент со ссылкой на версию + плоским снапшотом
     incident := Incident{
         ...
         ScenarioGUID:    scenario.GUID,
         ScenarioVersion: scenario.Version,        // NEW (см. §4.5)
-        Scenario:        flatScript,              // плоский, без CallScenario
+        Scenario:        scenario.Script,         // снапшот
     }
 
     return s.incidents.Create(ctx, incident)
 }
 ```
 
-При сохранении сценария — валидация циклов:
+При сохранении сценария — создаётся новая версия:
 
 ```go
 func (s *ScenarioService) Save(ctx, params SaveParams) (Scenario, error) {
-    // NEW: проверка циклов CallScenario
-    if err := s.resolver.ValidateNoCycles(ctx, params.Script); err != nil {
-        return Scenario{}, err  // Handler возвращает 422
-    }
-
-    // Дальше — как раньше: создать новую версию
     return s.scenarios.CreateNewVersion(ctx, params.GUID, params.IfMatch, params)
 }
 ```
 
-### 6.4. Optimistic locking
+### 6.3. Optimistic locking
 
 В `PUT /scenarios/{guid}`:
 
@@ -610,14 +508,9 @@ if errors.Is(err, ErrVersionConflict) {
     c.JSON(http.StatusPreconditionFailed, ...)
     return
 }
-if errors.Is(err, scenarioresolver.ErrCycleDetected{}) {
-    c.JSON(http.StatusUnprocessableEntity, ...)
-    return
-}
 ```
 
-Это спасает от потерянных правок при параллельной работе двух редакторов
-и от случайного создания циклов вложенности.
+Это спасает от потерянных правок при параллельной работе двух редакторов.
 
 ---
 
@@ -757,8 +650,6 @@ proposal, если будет нужно.
   - [ ] Тесты `test/integration/...` проходят после миграции
 - [ ] §5 OpenAPI-изменения совместимы с существующим UI редактора
 - [ ] §6 Объём правок в коде разумен (estimate в днях)
-  - [ ] Новый модуль `scenarioresolver` (§6.2) — алгоритм понятен и тестируем
-  - [ ] Цикл-валидация при сохранении возвращает 422 с понятным сообщением
 - [ ] §7 Rollback план приемлем
 - [ ] §10 Scope правильно огранен, ничего критичного не пропущено
 

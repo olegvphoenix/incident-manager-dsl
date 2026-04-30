@@ -1,0 +1,10 @@
+name: incident-configurator
+
+services:
+  web:
+    build: .
+    image: incident-configurator:latest
+    container_name: incident-configurator
+    restart: unless-stopped
+    ports:
+      - "8081:80"

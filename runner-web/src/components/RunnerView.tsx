@@ -9,6 +9,7 @@ import { Splitter } from "./Splitter";
 import { AddScenarioDialog } from "./AddScenarioDialog";
 import { ImportScenariosDialog } from "./ImportScenariosDialog";
 import { exportScenariosZip, downloadBlob } from "../scenarios/portability";
+import { openInConfigurator } from "../scenarios/openInConfigurator";
 import type { RunnerSnapshot } from "../engine/stateMachine";
 import { startScenario, submitStep, findStep } from "../engine/stateMachine";
 import type { Attachment, StepValue } from "../types/dsl";
@@ -59,7 +60,12 @@ export function RunnerView() {
   // GUID'ы встроенных примеров — нужны для дедупликации при импорте, чтобы
   // нельзя было «переопределить» поведение примера через user-копию.
   const builtinGuids = useMemo(
-    () => new Set(exampleScenarios.map((e) => e.scenario.metadata.scenarioGuid)),
+    () =>
+      new Set(
+        exampleScenarios
+          .map((e) => e.scenario?.metadata?.scenarioGuid)
+          .filter((g): g is string => typeof g === "string"),
+      ),
     [exampleScenarios],
   );
 
@@ -254,10 +260,6 @@ function IdleCenter({
           между ними. Размеры запоминаются.{" "}
           <button className="btn-mini" onClick={onResetCols}>сбросить ширину колонок</button>
         </p>
-        <p className="welcome__note">
-          Сценарии с типом <code>CallScenario</code> в этой демо не запускаются —
-          для них нужен серверный inline-резолв (см. <code>dsl-v1-draft.md</code> §6.8).
-        </p>
       </div>
     );
   }
@@ -277,64 +279,29 @@ function IdleCenter({
       <div className="welcome__actions">
         {selected.isRunnable ? (
           <button className="btn btn--primary" onClick={onRun}>▶ Запустить</button>
-        ) : selected.reasonNotRunnable === "call-scenario" ? (
-          <CallScenarioBlocked />
         ) : (
           <div className="welcome__blocked">
             <strong>Не запускается:</strong> {selected.reasonNotRunnable}
           </div>
         )}
+        <button
+          className="btn btn--secondary"
+          onClick={() =>
+            openInConfigurator({
+              scenario: selected.scenario,
+              baseName: selected.id.replace(/\.json$/i, ""),
+            })
+          }
+          title="Открыть сценарий в визуальном конфигураторе"
+        >
+          ✎ Редактировать в конфигураторе
+        </button>
         {onDeleteUser && (
           <button className="btn btn--danger" onClick={onDeleteUser}>
             🗑 Удалить из «Моих сценариев»
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-// Объяснение «почему этот сценарий нельзя запустить здесь, даже если на сервере
-// inline-резолв уже работает».
-function CallScenarioBlocked() {
-  return (
-    <div className="welcome__blocked welcome__blocked--explain">
-      <p>
-        <strong>Сценарий не запускается в этом runner-демо.</strong>
-      </p>
-      <p>
-        Он содержит шаги типа <code>CallScenario</code> — это «ссылка» на другой
-        библиотечный сценарий. По принципу <strong>П9</strong> runner не должен
-        ничего знать про вложенность: сервер обязан развернуть (inline) все
-        под-сценарии в плоский граф <em>до</em> отдачи runner&apos;у.
-      </p>
-      <p className="welcome__blocked-note">
-        Этот web-runner — статический демо-стенд (nginx без backend), он не
-        ходит ни в какой Go-сервер, поэтому inline-резолв здесь не делается
-        специально, чтобы не нарушать П9. Даже если у вас на бэкенде inline уже
-        реализован, это никак не влияет на этот UI.
-      </p>
-      <details className="welcome__blocked-howto">
-        <summary>Как тогда увидеть результат inline-резолва?</summary>
-        <ul>
-          <li>
-            Откройте пример{" "}
-            <code>examples/architecture/A3-inline-before-after/3-parent-after-inline-resolve.json</code>
-            {" "}— это тот же сценарий <em>после</em> inline-резолва. Запускается.
-          </li>
-          <li>
-            Чтобы протестировать ваш Go-сервер вживую — позовите его endpoint
-            (например <code>POST /scenarios/:guid/resolve</code>), сохраните
-            ответ как <code>.json</code> и загрузите через{" "}
-            <strong>+ Добавить</strong> или <strong>⬆ Импорт</strong> — он
-            попадёт в «Мои сценарии» и будет запускаться.
-          </li>
-          <li>
-            Подробности — <code>dsl-v1-draft.md</code> §6.8 «CallScenario» и
-            принцип П9 в §1.
-          </li>
-        </ul>
-      </details>
     </div>
   );
 }

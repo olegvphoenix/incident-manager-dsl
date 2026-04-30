@@ -19,7 +19,7 @@ export const overviewDiagramSource = `flowchart LR
     Metadata["metadata<br/><i>scenarioGuid · version · name</i>"]:::section
     Scalars["Scalars<br/><i>StepId · OptionId · Label · ScenarioGuid</i>"]:::scalar
 
-    subgraph Steps["Step (oneOf 8)"]
+    subgraph Steps["Step (oneOf 7)"]
       direction TB
       RB["RadioButton"]:::step
       CB["Checkbox"]:::step
@@ -28,7 +28,6 @@ export const overviewDiagramSource = `flowchart LR
       IM["Image"]:::step
       DT["Datetime"]:::step
       BT["Button"]:::step
-      CS["CallScenario<br/><sub>design-time only</sub>"]:::step
     end
 
     Transitions["Transitions<br/><i>rules[] + default</i>"]:::section
@@ -72,11 +71,9 @@ export const overviewDiagramSource = `flowchart LR
   Result --> Attachments
   IM -.id'ы вложений.-> Attachments
 
-  CS -.server inline-resolve.-> Steps
-
   click Scenario "#schema/root" "Перейти к корню"
   click Metadata "#schema/metadata" "Перейти к metadata"
-  click Steps "#schema/steps" "Все 8 типов шагов"
+  click Steps "#schema/steps" "Все 7 типов шагов"
   click RB "#schema/step:RadioButton" "RadioButton"
   click CB "#schema/step:Checkbox" "Checkbox"
   click SE "#schema/step:Select" "Select"
@@ -84,7 +81,6 @@ export const overviewDiagramSource = `flowchart LR
   click IM "#schema/step:Image" "Image"
   click DT "#schema/step:Datetime" "Datetime"
   click BT "#schema/step:Button" "Button"
-  click CS "#schema/step:CallScenario" "CallScenario"
   click Transitions "#schema/transitions" "Transitions"
   click Rule "#schema/transitions:rule" "Rule"
   click Actions "#schema/actions" "Все 5 actions"

@@ -23,12 +23,5 @@ export function StepRenderer({ step, onSubmit }: StepProps) {
     case "Comment":      return <CommentStepView step={step} onSubmit={onSubmit} />;
     case "Image":        return <ImageStepView step={step} onSubmit={onSubmit} />;
     case "Datetime":     return <DatetimeStepView step={step} onSubmit={onSubmit} />;
-    case "CallScenario":
-      return (
-        <div className="step step--callscenario">
-          <p className="step__title">CallScenario (require server-side inline resolve)</p>
-          <pre>{JSON.stringify(step.view, null, 2)}</pre>
-        </div>
-      );
   }
 }

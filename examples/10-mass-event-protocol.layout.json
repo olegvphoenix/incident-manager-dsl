@@ -1,0 +1,75 @@
+{
+  "layoutVersion": "1.0",
+  "scenarioRef": {
+    "scenarioGuid": "bb674088-cd09-7de8-8555-7fd75dbaefea",
+    "version": 1
+  },
+  "etag": "a7d44f34",
+  "nodes": {
+    "checklist": {
+      "x": 166,
+      "y": 16
+    },
+    "expected_visitors": {
+      "x": 166,
+      "y": 176
+    },
+    "event_start_date": {
+      "x": 166,
+      "y": 336
+    },
+    "key_zones": {
+      "x": 166,
+      "y": 496
+    },
+    "supervisor_briefing": {
+      "x": 166,
+      "y": 656
+    },
+    "venue_layout": {
+      "x": 166,
+      "y": 816
+    },
+    "additional_briefing_doc": {
+      "x": 166,
+      "y": 976
+    },
+    "ready_check": {
+      "x": 166,
+      "y": 1136
+    },
+    "btn_start_monitoring": {
+      "x": 16,
+      "y": 1296
+    },
+    "event_end_time": {
+      "x": 16,
+      "y": 1456
+    },
+    "incidents_during_event": {
+      "x": 16,
+      "y": 1616
+    },
+    "evidence_pack_images": {
+      "x": 96,
+      "y": 1776
+    },
+    "evidence_pack_notes": {
+      "x": 96,
+      "y": 1936
+    },
+    "btn_postpone": {
+      "x": 316,
+      "y": 1296
+    },
+    "btn_close_event": {
+      "x": 16,
+      "y": 2096
+    }
+  },
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

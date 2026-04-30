@@ -1,0 +1,71 @@
+{
+  "layoutVersion": "1.0",
+  "scenarioRef": {
+    "scenarioGuid": "edaa6418-51d3-721b-8872-462a7dfae577",
+    "version": 1
+  },
+  "etag": "64912bd8",
+  "nodes": {
+    "anomaly_type": {
+      "x": 616,
+      "y": 16
+    },
+    "reference_image": {
+      "x": 616,
+      "y": 176
+    },
+    "current_image": {
+      "x": 616,
+      "y": 336
+    },
+    "decision": {
+      "x": 616,
+      "y": 496
+    },
+    "sabotage_path": {
+      "x": 16,
+      "y": 656
+    },
+    "vandalism_path": {
+      "x": 316,
+      "y": 656
+    },
+    "weather_path": {
+      "x": 616,
+      "y": 656
+    },
+    "tech_fault_path": {
+      "x": 916,
+      "y": 656
+    },
+    "field_check_path": {
+      "x": 1216,
+      "y": 656
+    },
+    "btn_close_sabotage": {
+      "x": 16,
+      "y": 816
+    },
+    "btn_close_vandalism": {
+      "x": 316,
+      "y": 816
+    },
+    "btn_close_weather": {
+      "x": 616,
+      "y": 816
+    },
+    "btn_close_tech": {
+      "x": 916,
+      "y": 816
+    },
+    "btn_close_field": {
+      "x": 1216,
+      "y": 816
+    }
+  },
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

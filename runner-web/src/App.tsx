@@ -1,6 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { RunnerView } from "./components/RunnerView";
 import { HomeView } from "./components/HomeView";
+import { EmbedRunnerView } from "./components/EmbedRunnerView";
+import { openInConfigurator } from "./scenarios/openInConfigurator";
 
 // Документация, схема, mermaid и highlight.js — крупные. Грузятся только при переходе на вкладку.
 const DocsView = lazy(() => import("./components/DocsView").then((m) => ({ default: m.DocsView })));
@@ -17,7 +19,7 @@ const SchemaView = lazy(() => import("./components/SchemaView").then((m) => ({ d
 //
 // Всё в hash, чтобы при перезагрузке статика nginx не отдавала 404 на под-пути.
 
-type Tab = "home" | "runner" | "docs" | "schema";
+type Tab = "home" | "runner" | "docs" | "schema" | "embed-runner";
 
 interface Location {
   tab: Tab;
@@ -30,6 +32,8 @@ function parseLocation(): Location {
   const raw = window.location.hash.replace(/^#/, "");
   if (!raw || raw === "home") return { tab: "home", docId: null, anchor: null, schemaNodeId: null };
   if (raw === "runner") return { tab: "runner", docId: null, anchor: null, schemaNodeId: null };
+  if (raw === "embed-runner")
+    return { tab: "embed-runner", docId: null, anchor: null, schemaNodeId: null };
   if (raw === "docs") return { tab: "docs", docId: null, anchor: null, schemaNodeId: null };
   if (raw.startsWith("docs/")) {
     const rest = raw.slice("docs/".length);
@@ -74,6 +78,16 @@ export default function App() {
     setLoc(next);
   }, []);
 
+  // Embed-режим: только содержимое, без topbar. Используется когда страница
+  // загружена в iframe из конфигуратора для live-preview.
+  if (loc.tab === "embed-runner") {
+    return (
+      <div className="app app--embed" style={{ height: "100%" }}>
+        <EmbedRunnerView />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -86,16 +100,23 @@ export default function App() {
             Главная
           </button>
           <button
-            className={`topbar__tab ${loc.tab === "runner" ? "topbar__tab--active" : ""}`}
-            onClick={() => updateLocation({ tab: "runner", docId: null, anchor: null, schemaNodeId: null })}
-          >
-            Runner
-          </button>
-          <button
             className={`topbar__tab ${loc.tab === "schema" ? "topbar__tab--active" : ""}`}
             onClick={() => updateLocation({ tab: "schema", docId: null, anchor: null, schemaNodeId: loc.schemaNodeId })}
           >
             Схема
+          </button>
+          <button
+            className="topbar__tab topbar__tab--external"
+            onClick={() => openInConfigurator()}
+            title="Открыть конфигуратор сценариев"
+          >
+            Конфигуратор
+          </button>
+          <button
+            className={`topbar__tab ${loc.tab === "runner" ? "topbar__tab--active" : ""}`}
+            onClick={() => updateLocation({ tab: "runner", docId: null, anchor: null, schemaNodeId: null })}
+          >
+            Runner
           </button>
           <button
             className={`topbar__tab ${loc.tab === "docs" ? "topbar__tab--active" : ""}`}

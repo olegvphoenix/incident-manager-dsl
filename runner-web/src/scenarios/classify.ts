@@ -5,8 +5,7 @@ export type Category =
   | "showcase"       // showcase/* — стартовая витрина всех UI-примитивов DSL
   | "user"           // user/* — загруженные пользователем через UI
   | "production"     // 01..10 — операторские сценарии VMS
-  | "library"        // lib_* — переиспользуемые под-сценарии
-  | "architecture"   // architecture/A1, A3, A4, A7 — демонстрации архитектурных свойств
+  | "architecture"   // architecture/A1, A4, A7 — демонстрации архитектурных свойств
   | "antipattern";   // architecture/A5/* — анти-паттерны
 
 export interface CategoryDescriptor {
@@ -32,14 +31,9 @@ export const CATEGORIES: CategoryDescriptor[] = [
     hint: "10 операторских сценариев на реальном бизнес-домене: камеры, СКУД, пожарная сигнализация",
   },
   {
-    id: "library",
-    title: "Библиотечные под-сценарии",
-    hint: "Переиспользуемые сценарии — оборачиваются в CallScenario из других",
-  },
-  {
     id: "architecture",
     title: "Архитектурные демо",
-    hint: "Доказательство архитектурных свойств DSL: minimal, inline-резолв, версионирование, читаемость diff'а",
+    hint: "Доказательство архитектурных свойств DSL: minimal, версионирование, читаемость diff'а",
   },
   {
     id: "antipattern",
@@ -67,8 +61,6 @@ function detectCategory(entry: ScenarioEntry): Category {
   if (entry.id.startsWith("user/")) return "user";
   if (entry.id.startsWith("architecture/A5-anti-patterns/")) return "antipattern";
   if (entry.id.startsWith("architecture/")) return "architecture";
-  if (entry.id.startsWith("lib_")) return "library";
-  if (entry.scenario.metadata?.kind === "library") return "library";
   return "production";
 }
 
@@ -98,8 +90,6 @@ function detectGroup(entry: ScenarioEntry, category: Category): { id: string; la
 function groupLabel(code: string): string {
   const labels: Record<string, string> = {
     "A1": "A1 — Минимальный сценарий",
-    "A3": "A3 — Inline до/после",
-    "A3-inline-before-after": "A3 — Inline до/после",
     "A4": "A4 — Версионирование",
     "A4-versioning-demo": "A4 — Версионирование",
     "A5": "A5 — Анти-паттерны",

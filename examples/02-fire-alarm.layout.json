@@ -1,0 +1,43 @@
+{
+  "layoutVersion": "1.0",
+  "scenarioRef": {
+    "scenarioGuid": "ab689e2f-ddb6-75a6-8987-119d22ff759e",
+    "version": 1
+  },
+  "etag": "3355c4e6",
+  "nodes": {
+    "confirm_fire": {
+      "x": 316,
+      "y": 16
+    },
+    "fire_photo": {
+      "x": 16,
+      "y": 176
+    },
+    "first_observed_at": {
+      "x": 16,
+      "y": 336
+    },
+    "no_video_protocol": {
+      "x": 316,
+      "y": 336
+    },
+    "operator_note_false": {
+      "x": 616,
+      "y": 176
+    },
+    "btn_finish_real": {
+      "x": 166,
+      "y": 496
+    },
+    "btn_finish_false": {
+      "x": 616,
+      "y": 336
+    }
+  },
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

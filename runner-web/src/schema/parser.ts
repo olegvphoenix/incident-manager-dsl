@@ -143,7 +143,6 @@ function defNameToNodeId(defName: string): string {
   // Step* → step:RadioButton/etc; *Action → action:callMacro/etc; иначе — defName в lower-camel.
   if (defName.endsWith("Step")) {
     const stem = defName.slice(0, -"Step".length);
-    if (stem === "Call" + "Scenario") return `step:CallScenario`;
     return `step:${stem}`;
   }
   if (defName.endsWith("Action")) {
@@ -167,7 +166,6 @@ const STEP_TYPES = [
   ["Comment",      "CommentStep"],
   ["Image",        "ImageStep"],
   ["Datetime",     "DatetimeStep"],
-  ["CallScenario", "CallScenarioStep"],
 ] as const;
 
 const ACTION_TYPES = [
@@ -186,7 +184,7 @@ function buildTree(): SchemaTree {
     return node;
   }
 
-  // ── 1. Шаги (8 типов) ───────────────────────────────────────────────────────
+  // ── 1. Шаги (7 типов) ───────────────────────────────────────────────────────
   const stepNodes = STEP_TYPES.map(([variant, defName]) => reg<SchemaNode>({
     id: `step:${variant}`,
     title: variant,
@@ -203,7 +201,7 @@ function buildTree(): SchemaTree {
 
   const stepsNode = reg<SchemaNode>({
     id: "steps",
-    title: "Шаги (8 типов)",
+    title: "Шаги (7 типов)",
     shortDescription: "Дискриминированное объединение по полю type",
     description: defs.Step?.description,
     defName: "Step",
@@ -529,16 +527,6 @@ function makeExampleForStep(variant: string): string {
   "view": {
     "label": "Когда произошло",
     "kind": "datetime"
-  },
-  "transitions": { "default": { "goto": "next" } }
-}`;
-    case "CallScenario":
-      return `{
-  "id": "supervisor",
-  "type": "CallScenario",
-  "view": {
-    "scenarioGuid": "01900000-0000-7000-8000-0000000000ab",
-    "version": 1
   },
   "transitions": { "default": { "goto": "next" } }
 }`;

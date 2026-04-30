@@ -5,10 +5,9 @@
     "scenarioGuid": "bb674088-cd09-7de8-8555-7fd75dbaefea",
     "version": 1,
     "name": "Массовое мероприятие — комплексный регламент",
-    "description": "Комплексный сценарий обеспечения безопасности на массовом мероприятии (концерт, спортивное событие). Демонстрирует все 7 интерактивных типов шагов и 2 sub-scenario. Несколько операторов могут работать с инцидентами параллельно.",
+    "description": "Комплексный сценарий обеспечения безопасности на массовом мероприятии (концерт, спортивное событие). Демонстрирует все 7 интерактивных типов шагов. Несколько операторов могут работать с инцидентами параллельно.",
     "demonstrates": [
       "все 7 интерактивных типов шагов в одном сценарии",
-      "2 разных CallScenario",
       "concurrency.stepLockable=false (несколько операторов параллельно)",
       "concurrency.allowMultitasking=true",
       "JSONLogic and/or/in",
@@ -20,8 +19,7 @@
     "tags": [
       "mass-event",
       "comprehensive",
-      "all-features",
-      "sub-scenario"
+      "all-features"
     ]
   },
   "initialStepId": "checklist",
@@ -187,15 +185,26 @@
     },
     {
       "id": "supervisor_briefing",
-      "type": "CallScenario",
+      "type": "Comment",
       "title": "Шаг 5. Согласование плана со старшим",
       "view": {
-        "scenarioGuid": "00000000-0000-0001-0000-000000000001",
-        "version": 1
+        "label": "Кратко зафиксируйте согласование плана со старшим смены: канал связи, ключевые риски, договорённости.",
+        "placeholder": "Пример: связь по Talk #5; основные риски — давка у главного входа; решение о посекторном перекрытии — за старшим.",
+        "required": true,
+        "minLength": 30,
+        "minRows": 3
       },
       "transitions": {
         "default": {
-          "goto": "venue_layout"
+          "goto": "venue_layout",
+          "actions": [
+            {
+              "type": "assign",
+              "args": {
+                "to": "shift-supervisor"
+              }
+            }
+          ]
         }
       }
     },
@@ -356,7 +365,7 @@
                 "major"
               ]
             },
-            "goto": "evidence_pack"
+            "goto": "evidence_pack_images"
           }
         ],
         "default": {
@@ -365,12 +374,30 @@
       }
     },
     {
-      "id": "evidence_pack",
-      "type": "CallScenario",
-      "title": "Шаг 12. Сбор доказательной базы",
+      "id": "evidence_pack_images",
+      "type": "Image",
+      "title": "Шаг 12a. Снимки происшествий",
       "view": {
-        "scenarioGuid": "00000000-0000-0001-0000-000000000003",
-        "version": 1
+        "label": "Прикрепите снимки серьёзных происшествий с камер мероприятия.",
+        "source": "camera",
+        "allowMultiple": true,
+        "required": true
+      },
+      "transitions": {
+        "default": {
+          "goto": "evidence_pack_notes"
+        }
+      }
+    },
+    {
+      "id": "evidence_pack_notes",
+      "type": "Comment",
+      "title": "Шаг 12b. Описание для протокола",
+      "view": {
+        "label": "Хронологически опишите серьёзные происшествия: время, зона, участники, действия охраны.",
+        "required": true,
+        "minLength": 50,
+        "minRows": 6
       },
       "transitions": {
         "default": {

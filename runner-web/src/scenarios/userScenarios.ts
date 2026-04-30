@@ -39,16 +39,12 @@ function recomputeSnapshot(): void {
   const raw = localStorage.getItem(KEY) ?? "";
   if (raw === cachedFromRaw) return;        // данные не менялись — не пересчитываем
   cachedFromRaw = raw;
-  cachedSnapshot = readAll().map((item) => {
-    const hasCallScenario = item.scenario.steps.some((s) => s.type === "CallScenario");
-    return {
-      id: PREFIX + item.fileName,
-      path: PREFIX + item.fileName,
-      scenario: item.scenario,
-      isRunnable: !hasCallScenario,
-      reasonNotRunnable: hasCallScenario ? "call-scenario" : undefined,
-    };
-  });
+  cachedSnapshot = readAll().map((item) => ({
+    id: PREFIX + item.fileName,
+    path: PREFIX + item.fileName,
+    scenario: item.scenario,
+    isRunnable: true,
+  }));
 }
 
 function writeAll(items: StoredItem[]): void {

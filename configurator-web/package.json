@@ -1,0 +1,43 @@
+{
+  "name": "incident-manager-configurator-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Web-редактор сценариев Incident Manager DSL v1. Standalone-приложение для создания и правки сценариев в виде flow-диаграммы и таблицы. Layout сценария хранится отдельно (sidecar) от DSL.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke-examples.mjs",
+    "gen-layouts": "node scripts/generate-layouts.mjs"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.16.7",
+    "@mui/material": "^5.16.7",
+    "@tanstack/react-virtual": "^3.10.8",
+    "@xyflow/react": "^12.3.5",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "dagre": "^0.8.5",
+    "immer": "^11.1.4",
+    "json-logic-js": "^2.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "uuid": "^11.0.3",
+    "zundo": "^2.2.0",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/dagre": "^0.7.52",
+    "@types/json-logic-js": "^2.0.8",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
