@@ -25,3 +25,8 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# Competitor materials (internal analysis, not for distribution)
+# Note: folder name starts with Cyrillic "С" (U+0421), not Latin "C"
+Сompetitors/
+Competitors/
